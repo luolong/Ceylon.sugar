@@ -1,0 +1,238 @@
+<?xml version="1.0"?>
+<syntax name="language-root.ceylon">
+
+<zones>
+	<include collection="comments" />
+	<include collection="strings" />
+	<include collection="annotations" />
+	<include collection="keywords" />
+	<include collection="variables" />
+	<include collection="operators" />
+	<include collection="punctuation" />
+</zones>
+
+<library>
+    <collection name="comments">
+		<!-- This one is a bit weird; it's technically a line comment, but because it spans multiple lines we need to make the system think of it like a block comment -->
+		<zone name="comment.block.line-by-line.documentation">
+			<starts-with>
+				<expression>(//([!/])/*)</expression>
+				<capture number="1" name="punctuation.definition.begin"/>
+			</starts-with>
+			<ends-with>
+				<expression>^(?!\s*//\2)</expression>
+			</ends-with>
+		</zone>
+    	
+		<!-- Task comments -->
+		<!-- FIXME: this implementation is fragile, as it only triggers if the keyword is in the first line of the comment -->
+		<zone name="comment.block.task">
+			<starts-with>
+				<expression>(/\*)(?=.*?\b(?i:FIX ?ME|TODO)\b)</expression>
+				<capture number="1" name="punctuation.definition.begin"/>
+			</starts-with>
+			<ends-with>
+				<expression>\*/</expression>
+				<capture number="0" name="punctuation.definition.end"/>
+			</ends-with>
+			<subzones>
+				<zone name="keyword">
+					<expression>\b(?i:FIX ?ME|TODO)\b</expression>
+				</zone>
+			</subzones>
+			<zone name="comment.line.task">
+				<starts-with>
+					<expression>(//)(?=.*?\b(?i:FIX ?ME|TODO)\b)</expression>
+					<capture number="1" name="punctuation.definition.begin"/>
+				</starts-with>
+				<ends-with>
+					<expression>$[\n\r]*</expression>
+				</ends-with>
+				<subzones>
+					<zone name="keyword">
+						<expression>\b(?i:FIX ?ME|TODO)\b</expression>
+					</zone>
+				</subzones>
+			</zone>
+		</zone>
+		
+    	<!-- Standard comments -->
+		<zone name="comment.block">
+			<starts-with>
+				<expression>/\*</expression>
+				<capture number="0" name="punctuation.definition.begin"/>
+			</starts-with>
+			<ends-with>
+				<expression>\*/</expression>
+				<capture number="0" name="punctuation.definition.end"/>
+			</ends-with>
+		</zone>
+		<zone name="comment.line">
+			<expression>(//).*$[\n\r]*</expression>
+			<capture number="1" name="punctuation.definition.begin"/>
+		</zone>
+    </collection>
+    
+    <!-- Strings -->
+    <collection name="strings">
+		<zone name="string.quoted.single">
+			<starts-with>
+				<expression>'</expression>
+				<capture number="0" name="punctuation.definition.begin"/>
+			</starts-with>
+			<ends-with>
+				<expression>'</expression>
+				<capture number="0" name="punctuation.definition.end"/>
+			</ends-with>
+			<subzones>
+				<include collection="character-escapes" />
+			</subzones>
+		</zone>
+		<zone name="string.quoted.double">
+			<starts-with>
+				<expression>(")(?:)</expression>
+				<capture number="0" name="punctuation.definition.begin"/>
+			</starts-with>
+			<ends-with>
+				<expression>"</expression>
+				<capture number="0" name="punctuation.definition.end"/>
+			</ends-with>
+			<subzones>
+				<include collection="character-escapes" />
+			</subzones>
+		</zone>
+    </collection>
+
+	<!--Character Escapes-->
+	<collection name="character-escapes">
+		<zone name="constant.character.escape">
+			<expression>(\\)(?:[btnfr\\"'`]|\{([0-9A-Fa-f]{4}|[0-9A-Fa-f]{8})\})</expression>
+			<capture number="1" name="punctuation.escape.backslash"/>
+		</zone>
+	</collection>
+	
+	<collection name="annotations">
+		<zone name="meta.annotation.modifier">
+			<expression>\b(shared|abstract|formal|default|actual|variable|literal|small)\b</expression>
+			<capture number="1" name="name"/>
+		</zone>
+		<zone name="meta.annotation.deprecated">
+			<expression>\b(deprecated)\b</expression>
+			<capture number="1" name="name"/>
+		</zone>
+		<zone name="meta.annotation.documentation">
+			<expression>\b(doc|by|license|see|throws|tagged)\b</expression>
+			<capture number="1" name="name"/>
+		</zone>
+	</collection>
+
+	<!-- Keywords -->
+	<collection name="keywords">
+		<zone name="keyword.definition.class">
+			<expression>\b(class)\b</expression>
+		</zone>
+		<zone name="keyword.definition.interface">
+			<expression>\b(interface)\b</expression>
+		</zone>
+		<zone name="keyword.definition.package">
+			<expression>\b(package)\b</expression>
+		</zone>
+		<zone name="keyword.definition.module">
+			<expression>\b(module)\b</expression>
+		</zone>
+		<zone name="keyword.inheritance">
+			<expression>\b(extends|satisfies)\b</expression>
+		</zone>
+		<zone name="keyword.inheritance.constraints">
+			<expression>\b(of|given)\b</expression>
+		</zone>
+		<zone name="keyword.control.flow">
+			<expression>\b(if|then|else|switch|case|for|while)\b</expression>
+		</zone>
+		<zone name="keyword.control.exception">
+			<expression>\b(try|catch)\b</expression>
+		</zone>
+		<zone name="keyword.variable.language">
+			<expression>\b(super|this|outer)\b</expression>
+		</zone>
+	</collection>
+	
+	<!-- Variables -->
+	<collection name="variables">
+		<zone>
+			<expression>\b((?:\\i|\p{Ll})\w*)\b</expression>
+			<capture number="0" name="variable"/>
+		</zone>
+	</collection>
+	
+	<!-- Operators -->
+	<collection name="operators">
+		<zone name="operator.assignment">
+			<expression>(?:[:.+\-/*%|^~]|[|&amp;]{1,2})?=</expression>
+		</zone>
+		<zone name="operator.binary">
+			<expression>[+\-/%]|[*]{1,2}</expression>
+		</zone>
+		<zone name="operator.bitwise.binary">
+			<expression>&lt;&lt;|>></expression>
+		</zone>
+		<zone name="operator.comparison">
+			<expression>===|==|!=|&lt;=>|>=|>|&lt;=|&lt;</expression>
+		</zone>
+		<zone name="operator.logical">
+			<expression>&amp;&amp;|\|\||!</expression>
+		</zone>
+		<zone name="operator.bitwise.binary">
+			<expression>&amp;| \| |\^</expression>
+		</zone>
+		<zone name="operator.bitwise.unary">
+			<expression>~</expression>
+		</zone>
+	</collection>
+
+	<!-- Punctuation -->
+	<collection name="punctuation">
+		<zone name="punctuation.delimiter.comma">
+			<expression>,</expression>
+		</zone>
+		<zone name="punctuation.brace.round.open">
+			<expression>\(</expression>
+		</zone>
+		<zone name="punctuation.brace.round.close">
+			<expression>\)</expression>
+		</zone>
+		<zone name="punctuation.brace.curly.open">
+			<expression>\{</expression>
+		</zone>
+		<zone name="punctuation.brace.curly.close">
+			<expression>\}</expression>
+		</zone>
+		<zone name="punctuation.brace.square.open">
+			<expression>\[</expression>
+		</zone>
+		<zone name="punctuation.brace.square.close">
+			<expression>\]</expression>
+		</zone>
+		<zone name="punctuation.statement.terminator">
+			<expression>\;</expression>
+		</zone>
+		<zone name="punctuation.questionmark">
+			<expression>\?</expression>
+		</zone>
+		<zone name="punctuation.questionmark.period">
+			<expression>\?\.</expression>
+		</zone>
+		<zone name="punctuation.ellipsis">
+			<expression>\.{3}</expression>
+		</zone>
+		<zone name="punctuation.range">
+			<expression>\.{2}</expression>
+		</zone>
+		<zone name="punctuation.delimiter.period">
+			<expression>\.</expression>
+		</zone>
+	</collection>
+	
+</library>
+    
+</syntax> 
