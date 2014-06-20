@@ -12,6 +12,26 @@
 </zones>
 
 <library>
+	<collection name="annotations">
+		<expression>\b((?:[a-z_0-9]|\\i[A-Z])\w)\b</expression>
+	</collection>
+	
+	<collection name="imports">
+		<zone name="meta.definition.import.ceylon">
+			<starts-with>
+				<expression>\b(import)\b([^{]*){</expression>
+				<capture number="1" name="keyword.definition.import"/>
+				<capture number="2" name="identifier.package.name">
+				</capture>
+			</starts-with>
+			<ends-with>
+				<expression>}</expression>
+			</ends-with>
+			<subzones>
+				<zone name=""></zone>
+			</subzones>
+		</zone>
+	</collection>
     <collection name="comments">
 		<!-- This one is a bit weird; it's technically a line comment, but because it spans multiple lines we need to make the system think of it like a block comment -->
 		<zone name="comment.block.line-by-line.documentation">
@@ -84,9 +104,6 @@
 				<expression>'</expression>
 				<capture number="0" name="punctuation.definition.end"/>
 			</ends-with>
-			<subzones>
-				<include collection="character-escapes" />
-			</subzones>
 		</zone>
 		<zone name="string.quoted.double">
 			<starts-with>
@@ -137,6 +154,9 @@
 		<zone name="keyword.definition.package">
 			<expression>\b(package)\b</expression>
 		</zone>
+		<zone name="keyword.definition.import">
+			<expression>\b(import)\b</expression>
+		</zone>
 		<zone name="keyword.definition.module">
 			<expression>\b(module)\b</expression>
 		</zone>
@@ -147,7 +167,10 @@
 			<expression>\b(of|given)\b</expression>
 		</zone>
 		<zone name="keyword.control.flow">
-			<expression>\b(if|then|else|switch|case|for|while)\b</expression>
+			<expression>\b(if|then|else|switch|case|for|while|assert)\b</expression>
+		</zone>
+		<zone name="keyword.control.return">
+			<expression>\b(return)\b</expression>
 		</zone>
 		<zone name="keyword.control.exception">
 			<expression>\b(try|catch)\b</expression>
@@ -178,6 +201,9 @@
 		</zone>
 		<zone name="operator.comparison">
 			<expression>===|==|!=|&lt;=>|>=|>|&lt;=|&lt;</expression>
+		</zone>
+		<zone name="operator.narrowing">
+			<expression>\b(is|exists)\b</expression>
 		</zone>
 		<zone name="operator.logical">
 			<expression>&amp;&amp;|\|\||!</expression>
